@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import socket
+import ipaddress
 
 cfg = "/etc/ssh-notify.conf.json"
 if len(sys.argv) > 1:
@@ -21,6 +22,15 @@ config = json.loads(open(cfg).read())
 
 if user in config.get('ignored-users', []):
 	sys.exit(0)
+
+ignored_hosts = config.get('ignored-hosts', [])
+if ignored_hosts:
+	rhost_addr = socket.gethostbyname(rhost)
+	for ignored_host in ignored_hosts:
+		if ignored_host in (rhost, rhost_addr):
+			sys.exit(0)
+		if ipaddress.ip_address(rhost_addr) in ipaddress.ip_network(ignored_host):
+			sys.exit(0)
 
 msg = "Login for %s from %s on %s" % (user, rhost, socket.gethostname())
 

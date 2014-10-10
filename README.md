@@ -20,9 +20,12 @@ The configuration file is a JSON dictionnary. Example configuration :
 	{
 		"api_key": "...",
 		"devices": ["device-1-id", "device-2-id"],
-		"ignored-users": []
+		"ignored-users": [],
+		"ignored-hosts": []
 	}
 
 * `api_key`: Obtained from Panacea Public Push Service
 * `device-n-id`: Obtained from Panacea mobile application
 * `ignored-users`: Don’t send notification for those users
+* `ignored-hosts`: Don’t send notification for connections incoming from given hosts.
+An host can be an IP address or a network (e.g. `192.168.0.0/24`).
