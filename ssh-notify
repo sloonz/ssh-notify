@@ -5,6 +5,7 @@ from urllib.parse import quote
 import os
 import sys
 import json
+import socket
 
 cfg = "/etc/ssh-notify.conf.json"
 if len(sys.argv) > 1:
@@ -21,7 +22,7 @@ config = json.loads(open(cfg).read())
 if user in config.get('ignored-users', []):
 	sys.exit(0)
 
-msg = "Login for %s from %s" % (user, rhost)
+msg = "Login for %s from %s on %s" % (user, rhost, socket.gethostname())
 
 for device in config.get('devices'):
 	params = {
