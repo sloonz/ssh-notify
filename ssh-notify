@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+
+from urllib.request import urlopen
+from urllib.parse import quote
+import os
+import sys
+import json
+
+cfg = "/etc/ssh-notify.conf.json"
+if len(sys.argv) > 1:
+	cfg = sys.argv[1]
+
+if "-h" in sys.argv or "--help" in sys.argv:
+	print("Usage: %s [path to configuration file]" % sys.argv[0])
+	sys.exit(1)
+
+rhost = os.getenv("PAM_RHOST")
+user = os.getenv("PAM_USER")
+config = json.loads(open(cfg).read())
+
+if user in config.get('ignored-users', []):
+	sys.exit(0)
+
+msg = "Login for %s from %s" % (user, rhost)
+
+for device in config.get('devices'):
+	params = {
+			"action": "push_public_outbound_message_send",
+			"api_key": config['api_key'],
+			"message": msg,
+			"device_id": device,
+	}
+
+	if config.get('thread'):
+		params['thread_id'] = config.get('thread')
+
+	if os.getenv("PAM_TYPE") == "open_session":
+		url = "https://push.panaceamobile.com/?" + "&".join("%s=%s" % (quote(k), quote(v)) for k,v in params.items())
+		urlopen(url).read()
